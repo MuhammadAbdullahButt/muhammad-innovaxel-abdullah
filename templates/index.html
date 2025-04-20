@@ -76,94 +76,128 @@
 
         // Initially show the first slide
         showSlide(currentSlide);
-
         function shortenUrl() {
-            const longUrl = document.getElementById("longUrl").value;
-            fetch('/shorten', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: longUrl })
-            })
-            .then(response => response.json())
-            .then(data => {
+    const longUrl = document.getElementById("longUrl").value;
+
+    fetch('/shorten', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: longUrl })
+    })
+    .then(response => {
+        if (response.status === 201) {
+            return response.json().then(data => {
                 const resultDiv = document.getElementById("result");
-                if (data.shortCode) {
-                    resultDiv.innerHTML = `Short URL: <a href="/shorten/${data.shortCode}" target="_blank">localhost:5000/shorten/${data.shortCode}</a>`;
-                } else {
-                    resultDiv.innerHTML = `Error: ${data.error}`;
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    
-        function retrieveUrl() {
-            const code = document.getElementById("retrieveCode").value;
-            fetch(`/shorten/${code}`)
-            .then(response => {
-                if (response.status === 404) return response.json().then(data => { throw data.error });
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("retrieveResult").innerHTML = `Original URL: ${data.url}`;
-            })
-            .catch(error => {
-                document.getElementById("retrieveResult").innerHTML = `Error: ${error}`;
+                resultDiv.innerHTML = ` Status ${response.status} Created <br> Short URL: <a href="/shorten/${data.shortCode}" target="_blank">localhost:5000/shorten/${data.shortCode}</a>`;
+            });
+        } else {
+            return response.json().then(data => {
+                throw { status: response.status, message: data.error };
             });
         }
-    
-        function deleteUrl() {
-            const code = document.getElementById("deleteCode").value;
-            fetch(`/shorten/${code}`, { method: 'DELETE' })
-            .then(response => {
-                if (response.status === 204) {
-                    document.getElementById("deleteResult").innerHTML = `Deleted successfully.`;
-                } else {
-                    return response.json().then(data => { throw data.error });
-                }
-            })
-            .catch(error => {
-                document.getElementById("deleteResult").innerHTML = `Error: ${error}`;
+    })
+    .catch(error => {
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = ` Error ${error.status}: ${error.message}`;
+    });
+}
+
+function retrieveUrl() {
+    const code = document.getElementById("retrieveCode").value;
+
+    fetch(`/shorten/${code}`)
+    .then(response => {
+        if (response.status === 200) {
+            return response.json().then(data => {
+                document.getElementById("retrieveResult").innerHTML = ` Status ${response.status} OK <br> Original URL: <a href="${data.url}" target="_blank">${data.url}</a>`;
             });
-        }
-    
-        function updateUrl() {
-            const code = document.getElementById("updateCode").value;
-            const newUrl = document.getElementById("newUrl").value;
-            fetch(`/shorten/${code}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url: newUrl })
-            })
-            .then(response => {
-                if (response.status === 404) return response.json().then(data => { throw data.error });
-                if (response.status === 400) return response.json().then(data => { throw data.error });
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("updateResult").innerHTML = `URL updated successfully to: ${data.url}`;
-            })
-            .catch(error => {
-                document.getElementById("updateResult").innerHTML = `Error: ${error}`;
+        } else if (response.status === 404) {
+            return response.json().then(data => {
+                throw { status: 404, message: data.error };
             });
+        } else {
+            throw { status: response.status, message: "Unexpected error occurred" };
         }
-    
-        function getStats() {
-            const code = document.getElementById("statsCode").value;
-            fetch(`/shorten/${code}/stats`)
-            .then(response => {
-                if (response.status === 404) return response.json().then(data => { throw data.error });
-                return response.json();
-            })
-            .then(data => {
-                document.getElementById("statsResult").innerHTML = `
-                    Original URL: ${data.url} <br>
-                    Access Count: ${data.accessCount}
-                `;
-            })
-            .catch(error => {
-                document.getElementById("statsResult").innerHTML = `Error: ${error}`;
+    })
+    .catch(error => {
+        document.getElementById("retrieveResult").innerHTML = ` Error ${error.status}: ${error.message}`;
+    });
+}
+
+function deleteUrl() {
+    const code = document.getElementById("deleteCode").value;
+
+    fetch(`/shorten/${code}`, { method: 'DELETE' })
+    .then(response => {
+        if (response.status === 204) {
+            document.getElementById("deleteResult").innerHTML = ` Status ${response.status} No Content — Deleted successfully.`;
+        } else if (response.status === 404) {
+            return response.json().then(data => {
+                throw { status: 404, message: data.error };
             });
+        } else {
+            throw { status: response.status, message: "Unexpected error occurred" };
         }
+    })
+    .catch(error => {
+        document.getElementById("deleteResult").innerHTML = ` Error ${error.status}: ${error.message}`;
+    });
+}
+
+function updateUrl() {
+    const code = document.getElementById("updateCode").value;
+    const newUrl = document.getElementById("newUrl").value;
+
+    fetch(`/shorten/${code}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ url: newUrl })
+    })
+    .then(response => {
+        if (response.status === 200) {
+            return response.json().then(data => {
+                document.getElementById("updateResult").innerHTML = ` Status ${response.status} OK <br> URL updated to: <a href="${data.url}" target="_blank">${data.url}</a>`;
+            });
+        } else if (response.status === 400) {
+            return response.json().then(data => {
+                throw { status: 400, message: data.error };
+            });
+        } else if (response.status === 404) {
+            return response.json().then(data => {
+                throw { status: 404, message: data.error };
+            });
+        } else {
+            throw { status: response.status, message: "Unexpected error occurred" };
+        }
+    })
+    .catch(error => {
+        document.getElementById("updateResult").innerHTML = ` Error ${error.status}: ${error.message}`;
+    });
+}
+
+function getStats() {
+    const code = document.getElementById("statsCode").value;
+
+    fetch(`/shorten/${code}/stats`)
+    .then(response => {
+        if (response.status === 200) {
+            return response.json().then(data => {
+                document.getElementById("statsResult").innerHTML = ` Status ${response.status} OK <br>
+                    Original URL: <a href="${data.url}" target="_blank">${data.url}</a><br>
+                    Access Count: ${data.accessCount}`;
+            });
+        } else if (response.status === 404) {
+            return response.json().then(data => {
+                throw { status: 404, message: data.error };
+            });
+        } else {
+            throw { status: response.status, message: "Unexpected error occurred" };
+        }
+    })
+    .catch(error => {
+        document.getElementById("statsResult").innerHTML = ` Error ${error.status}: ${error.message}`;
+    });
+}
     </script>
 </body>
 </html>
