@@ -7,6 +7,8 @@ from utils import generate_short_code
 from models import ShortURL
 
 app = Flask(__name__)
+
+#---------Database Initialization
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 db.init_app(app)
 
