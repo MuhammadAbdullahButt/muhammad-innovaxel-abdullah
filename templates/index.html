@@ -2,36 +2,138 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>URL Shortener</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>URL Shortener</h1>
-        <input type="text" id="longUrl" placeholder="Enter your long URL here">
-        <button onclick="shortenUrl()">Shorten</button>
-        <div id="result"></div>
+
+        <section>
+            <h2>Shorten URL</h2>
+            <input type="text" id="longUrl" placeholder="Enter your long URL here">
+            <button onclick="shortenUrl()">Shorten</button>
+            <div id="result"></div>
+        </section>
+
+        <section>
+            <h2>Retrieve URL</h2>
+            <input type="text" id="retrieveCode" placeholder="Enter short code">
+            <button onclick="retrieveUrl()">Retrieve</button>
+            <div id="retrieveResult"></div>
+        </section>
+
+        <section>
+            <h2>Delete URL</h2>
+            <input type="text" id="deleteCode" placeholder="Enter short code">
+            <button onclick="deleteUrl()">Delete</button>
+            <div id="deleteResult"></div>
+        </section>
+
+        <section>
+            <h2>Update URL</h2>
+            <input type="text" id="updateCode" placeholder="Enter short code">
+            <input type="text" id="newUrl" placeholder="Enter new URL">
+            <button onclick="updateUrl()">Update</button>
+            <div id="updateResult"></div>
+        </section>
+
+        <section>
+            <h2>Get Stats</h2>
+            <input type="text" id="statsCode" placeholder="Enter short code">
+            <button onclick="getStats()">Stats</button>
+            <div id="statsResult"></div>
+        </section>
     </div>
 
     <script>
         function shortenUrl() {
             const longUrl = document.getElementById("longUrl").value;
-
             fetch('/shorten', {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({url: longUrl})
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: longUrl })
             })
             .then(response => response.json())
             .then(data => {
                 const resultDiv = document.getElementById("result");
-                if(data.shortCode){
+                if (data.shortCode) {
                     resultDiv.innerHTML = `Short URL: <a href="/shorten/${data.shortCode}" target="_blank">localhost:5000/shorten/${data.shortCode}</a>`;
                 } else {
                     resultDiv.innerHTML = `Error: ${data.error}`;
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        function retrieveUrl() {
+            const code = document.getElementById("retrieveCode").value;
+            fetch(`/shorten/${code}`)
+            .then(response => {
+                if (response.status === 404) return response.json().then(data => { throw data.error });
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById("retrieveResult").innerHTML = `Original URL: ${data.url}`;
+            })
+            .catch(error => {
+                document.getElementById("retrieveResult").innerHTML = `Error: ${error}`;
+            });
+        }
+
+        function deleteUrl() {
+            const code = document.getElementById("deleteCode").value;
+            fetch(`/shorten/${code}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.status === 204) {
+                    document.getElementById("deleteResult").innerHTML = `Deleted successfully.`;
+                } else {
+                    return response.json().then(data => { throw data.error });
+                }
+            })
+            .catch(error => {
+                document.getElementById("deleteResult").innerHTML = `Error: ${error}`;
+            });
+        }
+
+        function updateUrl() {
+            const code = document.getElementById("updateCode").value;
+            const newUrl = document.getElementById("newUrl").value;
+            fetch(`/shorten/${code}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url: newUrl })
+            })
+            .then(response => {
+                if (response.status === 404) return response.json().then(data => { throw data.error });
+                if (response.status === 400) return response.json().then(data => { throw data.error });
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById("updateResult").innerHTML = `URL updated successfully to: ${data.url}`;
+            })
+            .catch(error => {
+                document.getElementById("updateResult").innerHTML = `Error: ${error}`;
+            });
+        }
+
+        function getStats() {
+            const code = document.getElementById("statsCode").value;
+            fetch(`/shorten/${code}/stats`)
+            .then(response => {
+                if (response.status === 404) return response.json().then(data => { throw data.error });
+                return response.json();
+            })
+            .then(data => {
+                document.getElementById("statsResult").innerHTML = `
+                    Original URL: ${data.url} <br>
+                    Access Count: ${data.accessCount}
+                `;
+            })
+            .catch(error => {
+                document.getElementById("statsResult").innerHTML = `Error: ${error}`;
+            });
         }
     </script>
 </body>
