@@ -8,46 +8,75 @@
 </head>
 <body>
     <div class="container">
-        <h1>URL Shortener</h1>
-
-        <section>
+        <div class="slide" id="slide1">
             <h2>Shorten URL</h2>
             <input type="text" id="longUrl" placeholder="Enter your long URL here">
             <button onclick="shortenUrl()">Shorten</button>
             <div id="result"></div>
-        </section>
+        </div>
 
-        <section>
+        <div class="slide" id="slide2">
             <h2>Retrieve URL</h2>
             <input type="text" id="retrieveCode" placeholder="Enter short code">
             <button onclick="retrieveUrl()">Retrieve</button>
             <div id="retrieveResult"></div>
-        </section>
+        </div>
 
-        <section>
+        <div class="slide" id="slide3">
             <h2>Delete URL</h2>
             <input type="text" id="deleteCode" placeholder="Enter short code">
             <button onclick="deleteUrl()">Delete</button>
             <div id="deleteResult"></div>
-        </section>
+        </div>
 
-        <section>
+        <div class="slide" id="slide4">
             <h2>Update URL</h2>
             <input type="text" id="updateCode" placeholder="Enter short code">
             <input type="text" id="newUrl" placeholder="Enter new URL">
             <button onclick="updateUrl()">Update</button>
             <div id="updateResult"></div>
-        </section>
+        </div>
 
-        <section>
+        <div class="slide" id="slide5">
             <h2>Get Stats</h2>
             <input type="text" id="statsCode" placeholder="Enter short code">
             <button onclick="getStats()">Stats</button>
             <div id="statsResult"></div>
-        </section>
+        </div>
+
+        <div class="navigation">
+            <button onclick="prevSlide()">Prev</button>
+            <button onclick="nextSlide()">Next</button>
+        </div>
     </div>
 
     <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+
+        function showSlide(index) {
+            if (index < 0 || index >= slides.length) return;
+            slides.forEach((slide, i) => {
+                slide.style.display = (i === index) ? 'block' : 'none';
+            });
+            currentSlide = index;
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        // Initially show the first slide
+        showSlide(currentSlide);
+
         function shortenUrl() {
             const longUrl = document.getElementById("longUrl").value;
             fetch('/shorten', {
@@ -66,7 +95,7 @@
             })
             .catch(error => console.error('Error:', error));
         }
-
+    
         function retrieveUrl() {
             const code = document.getElementById("retrieveCode").value;
             fetch(`/shorten/${code}`)
@@ -81,7 +110,7 @@
                 document.getElementById("retrieveResult").innerHTML = `Error: ${error}`;
             });
         }
-
+    
         function deleteUrl() {
             const code = document.getElementById("deleteCode").value;
             fetch(`/shorten/${code}`, { method: 'DELETE' })
@@ -96,7 +125,7 @@
                 document.getElementById("deleteResult").innerHTML = `Error: ${error}`;
             });
         }
-
+    
         function updateUrl() {
             const code = document.getElementById("updateCode").value;
             const newUrl = document.getElementById("newUrl").value;
@@ -117,7 +146,7 @@
                 document.getElementById("updateResult").innerHTML = `Error: ${error}`;
             });
         }
-
+    
         function getStats() {
             const code = document.getElementById("statsCode").value;
             fetch(`/shorten/${code}/stats`)

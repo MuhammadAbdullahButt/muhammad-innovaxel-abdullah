@@ -1,70 +1,84 @@
-/* Global Styles */
+/* Global styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f7f9fc;
+    font-family: Arial, sans-serif;
+    background-color: #808080;  /* Gray background */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    overflow: hidden;  /* Hide overflow to ensure scrolling is not visible */
 }
 
-/* Container Styles */
 .container {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    height: 80%;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);  /* Subtle shadow */
+    overflow: hidden;
+}
+
+.slide {
+    display: none;
     width: 100%;
-    max-width: 600px;
+    padding: 20px;
     text-align: center;
 }
 
-/* Heading Styles */
-h1, h2 {
-    color: #333;
+h2 {
     margin-bottom: 20px;
 }
 
-h2 {
-    margin-top: 20px;
-}
-
-/* Input and Button Styles */
-input, button {
-    padding: 12px;
+input {
+    padding: 10px;
     width: 70%;
-    margin-bottom: 15px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 16px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
 
-/* Button Hover Effect */
 button {
+    padding: 10px 20px;
     background-color: #0077cc;
     color: white;
+    border: none;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    margin-top: 10px;
 }
 
 button:hover {
     background-color: #005fa3;
 }
 
-/* Result Display */
-div {
+#result, #retrieveResult, #deleteResult, #updateResult, #statsResult {
     margin-top: 15px;
-    font-size: 16px;
-    color: #555;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    color: #333;
 }
 
-/* Section Styles */
-section {
-    margin-bottom: 30px;
+.navigation {
+    margin-top: 20px;
 }
 
-/* Error Message */
-#error {
-    color: red;
+button {
+    padding: 10px 20px;
+    background-color: #0077cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 10px;
+}
+
+button:hover {
+    background-color: #005fa3;
 }
